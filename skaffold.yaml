@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/krithiva/atlas-jira-ruby:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/krithiva/atlas-jira-ruby:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: atlas-jira-ruby
+        chartPath: charts/atlas-jira-ruby
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/krithiva/atlas-jira-ruby'
+          image.tag: '{{.DIGEST_HEX}}'
